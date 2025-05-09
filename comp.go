@@ -22,7 +22,7 @@ type SidecarData struct {
 	// unique id
 	ID uint16 `json:"id"`
 
-	// only populated in return of readSidecars
+	// populated by readSidecars
 	ParentSize int64
 	ParentPath string
 }
@@ -33,6 +33,12 @@ func (s *SidecarData) FormatHay() string {
 		s.ID, s.BackupOf,
 		s.Time.Local().Format(config.TimeFormat),
 	))
+}
+func (s *SidecarData) DeleteAll() {
+	if s.ParentPath != "" {
+		os.Remove(s.ParentPath)
+		os.Remove(s.ParentPath + ".json")
+	}
 }
 
 // important: name and backupOf should be absolute paths
@@ -89,7 +95,7 @@ func readSidecars() ([]SidecarData, error) {
 
 		_, err := os.Stat(parentAbs)
 		if errors.Is(err, os.ErrNotExist) {
-			fmt.Println("WARNING: Sidecar without parent found. Deleting...")
+			fmt.Fprintln(os.Stderr, "WARNING: Sidecar without parent found. Deleting...")
 			os.Remove(entryAbs)
 			continue
 		}

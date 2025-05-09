@@ -36,7 +36,7 @@ func loadConfig() {
 
 	err = json.Unmarshal(contents, &config)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, "error parsing config: ", err)
 		os.Exit(1)
 	}
 }

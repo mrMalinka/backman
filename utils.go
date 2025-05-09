@@ -9,7 +9,9 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func askYesNo(prompt string) bool {
@@ -31,6 +33,20 @@ func askYesNo(prompt string) bool {
 			return false
 		}
 	}
+}
+
+func readUint16Fatal(str string) uint16 {
+	rawID, err := strconv.Atoi(str)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error parsing ID: ", err)
+		os.Exit(1)
+	}
+	if rawID < 0 || rawID > math.MaxUint16 {
+		fmt.Fprintln(os.Stderr, "Please enter a valid ID. (0-65535)")
+		os.Exit(1)
+	}
+
+	return uint16(rawID)
 }
 
 func closestMissing(nums []uint16) uint16 {
@@ -81,7 +97,7 @@ func generateUUID() string {
 	b := make([]byte, 16)
 	if _, err := io.ReadFull(rand.Reader, b); err != nil {
 		// realistically this is never gonna happen anyways
-		fmt.Println("error reading from rand: ", err)
+		fmt.Fprintln(os.Stderr, "error reading from rand: ", err)
 		os.Exit(1)
 	}
 
@@ -96,6 +112,17 @@ func generateUUID() string {
 		b[10:16],
 	)
 	return uuid
+}
+
+func parseDurationExt(s string) (time.Duration, error) {
+	if strings.HasSuffix(s, "d") {
+		n, err := strconv.Atoi(strings.TrimSuffix(s, "d"))
+		if err != nil {
+			return 0, err
+		}
+		return time.Duration(n) * 24 * time.Hour, nil
+	}
+	return time.ParseDuration(s)
 }
 
 func dirSize(root string) int64 {
