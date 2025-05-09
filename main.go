@@ -220,7 +220,7 @@ func deleteBackup(id uint16) {
 	for _, file := range files {
 		if file.ID == id {
 			file.DeleteAll()
-			fmt.Println("Deleted successfully")
+			fmt.Println("Deleted successfully!")
 			return
 		}
 	}
